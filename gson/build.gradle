@@ -1,0 +1,119 @@
+apply plugin: 'com.android.library'
+apply from: "$project.rootDir/tools/versions_configuration.gradle"
+// JitPack Maven
+apply plugin: 'com.github.dcendents.android-maven'
+// Your Group
+group='com.github.zerochl'
+
+android {
+    compileSdkVersion getProject().compileSdkVersion
+
+    defaultConfig {
+        minSdkVersion getProject().minSdkVersion
+        targetSdkVersion getProject().targetSdkVersion
+        versionCode 1
+        versionName "1.0"
+
+        testInstrumentationRunner "androidx.test.runner.AndroidJUnitRunner"
+    }
+
+    buildTypes {
+
+        release {
+            consumerProguardFiles 'proguard-rules.pro'
+        }
+
+        pre {
+            consumerProguardFiles 'proguard-rules.pro'
+        }
+
+        atest {
+            consumerProguardFiles 'proguard-rules.pro'
+        }
+
+        debug {
+            consumerProguardFiles 'proguard-rules.pro'
+        }
+
+    }
+
+    compileOptions {
+        sourceCompatibility JavaVersion.VERSION_1_8
+        targetCompatibility JavaVersion.VERSION_1_8
+    }
+
+    sourceSets {
+        main {
+            jniLibs.srcDirs = ['libs']
+        }
+    }
+}
+
+repositories {
+    //指定aar目录
+    flatDir {
+        dirs 'libs'
+    }
+}
+
+dependencies {
+    implementation fileTree(dir: 'libs', include: ['*.jar'])
+
+    testImplementation 'junit:junit:4.12'
+    androidTestImplementation 'com.android.support.test:runner:1.0.2'
+    androidTestImplementation 'com.android.support.test.espresso:espresso-core:3.0.2'
+}
+
+def siteUrl = 'https://github.com/zerochl/FixedGson'   // 项目的主页
+def gitUrl = 'git@github.com:zerochl/FixedGson.git'   // Git仓库的url
+group = "com.zero.cdownload"            // Maven Group ID for the artifact，一般填你唯一的包名
+install {
+    repositories.mavenInstaller {
+        // This generates POM.xml with proper parameters
+        pom {
+            project {
+                packaging 'aar'
+                // Add your description here
+                name '修复Gson的部分bug，例如object序列化与反序列化导致int类型变double类型的问题'
+                url siteUrl
+                // Set your license
+                licenses {
+                    license {
+                        name 'The Apache Software License, Version 2.0'
+                        url 'http://www.apache.org/licenses/LICENSE-2.0.txt'
+                    }
+                }
+                developers {
+                    developer {
+                        id 'zerochl'      //填写的一些基本信息
+                        name 'zerochl'
+                        email 'zerochlwork@gmail.com'
+                    }
+                }
+                scm {
+                    connection gitUrl
+                    developerConnection gitUrl
+                    url siteUrl
+                }
+            }
+        }
+    }
+}
+task sourcesJar(type: Jar) {
+    from android.sourceSets.main.java.srcDirs
+    classifier = 'sources'
+}
+task javadoc(type: Javadoc) {
+    source = android.sourceSets.main.java.srcDirs
+    classpath += project.files(android.getBootClasspath().join(File.pathSeparator))
+}
+task javadocJar(type: Jar, dependsOn: javadoc) {
+    classifier = 'javadoc'
+    from javadoc.destinationDir
+}
+artifacts {
+    archives javadocJar
+    archives sourcesJar
+}
+Properties properties = new Properties()
+properties.load(project.rootProject.file('local.properties').newDataInputStream())
